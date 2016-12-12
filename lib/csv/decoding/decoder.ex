@@ -162,7 +162,9 @@ defmodule CSV.Decoding.Decoder do
   defp validate_row_length({ data, index }, expected_length) do
     case data |> Enum.count do
       ^expected_length -> { :ok, data }
-      actual_length -> { :ok, data }
+      actual_length ->
+       IO.puts "Row has length #{actual_length} - expected length #{expected_length} index: #{index} #{inspect data}"
+       { :ok, data }
     end
   end
 
