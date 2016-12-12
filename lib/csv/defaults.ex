@@ -9,7 +9,7 @@ defmodule CSV.Defaults do
       @newline            ?\n
       @carriage_return    ?\r
       @delimiter          << @carriage_return :: utf8 >> <> << @newline :: utf8 >>
-      @double_quote       ?"
+      @double_quote       ?±
       @escape_max_lines   1000
     end
   end
