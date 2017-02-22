@@ -3,6 +3,7 @@ defmodule CSV do
   alias CSV.Decoding.Decoder
   alias CSV.Encoding.Encoder
   alias CSV.EscapeSequenceError
+  alias CSV.RowLengthError
 
   @moduledoc ~S"""
   RFC 4180 compliant CSV parsing and encoding for Elixir. Allows to specify other separators,
@@ -102,7 +103,18 @@ defmodule CSV do
   defp yield_or_inline!({ :error, EscapeSequenceError, escape_sequence, index }) do
     { :error, EscapeSequenceError.exception(escape_sequence: escape_sequence, line: index + 1, escape_max_lines: -1).message }
   end
-  defp yield_or_inline!({ :error, errormod, message, index }) do
+  defp yield_or_inline!({ :error, RowLengthError, actual_length, expected_length, message, index, row}) do
+    { :error, RowLengthError.exception(message: message, line: index + 1).message,
+      %{
+        error_type: RowLengthError,
+        actual_length: actual_length,
+        expected_length: expected_length,
+        line: index,
+        row: row
+      }
+    }
+  end
+  defp yield_or_inline!({ :error, errormod, message, index}) do
     { :error, errormod.exception(message: message, line: index + 1).message }
   end
   defp yield_or_inline!(value), do: value

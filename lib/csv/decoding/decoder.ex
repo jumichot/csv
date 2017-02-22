@@ -99,7 +99,7 @@ defmodule CSV.Decoding.Decoder do
   end
   defp decode_row({ line, index, headers, row_length }, options) do
     with { :ok, parsed, _ } <- parse_row({ line, index }, options),
-         { :ok, _ } <- validate_row_length({ parsed, index }, row_length),
+         { :ok, _ } <- validate_row_length({ parsed, index }, row_length, headers),
     do: build_row(parsed, headers)
   end
 
@@ -157,14 +157,13 @@ defmodule CSV.Decoding.Decoder do
     { [{ line, index, headers, row_length }], { row_length, options } }
   end
 
-  defp validate_row_length({ data, _ }, false ), do: { :ok, data }
-  defp validate_row_length({ data, _ }, nil ), do: { :ok, data }
-  defp validate_row_length({ data, index }, expected_length) do
+  defp validate_row_length({ data, _ }, false, _ ), do: { :ok, data }
+  defp validate_row_length({ data, _ }, nil, _ ), do: { :ok, data }
+  defp validate_row_length({ data, index }, expected_length, headers) do
     case data |> Enum.count do
       ^expected_length -> { :ok, data }
-      actual_length ->
-       IO.puts "Row has length #{actual_length} - expected length #{expected_length} index: #{index} #{inspect data}"
-       { :ok, data }
+       actual_length ->
+         { :error, RowLengthError, actual_length, expected_length, "Row has length #{actual_length} - expected length #{expected_length}", index, build_row(data, headers) }
     end
   end
 
